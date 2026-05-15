@@ -55,17 +55,66 @@ page = st.sidebar.selectbox("Navigate", [
 # ====================== DASHBOARD ======================
 if page == "Dashboard":
     st.header("Key Performance Indicators")
-    # ... (your dashboard code)
+    col1, col2, col3, col4 = st.columns(4)
+
+    total = len(df)
+    open_cases = len(df[df["Status"].isin(["Open", "In Progress"])])
+    success_rate = (df["Success_YN"].eq("Y").sum() / len(df[df["Success_YN"].isin(["Y","N"])]) * 100) if len(df[df["Success_YN"].isin(["Y","N"])]) > 0 else 0
+    avg_mttr = df["Downtime_Hours"].mean() if total > 0 else 0
+
+    col1.metric("Total Incidents", total)
+    col2.metric("Open Cases", open_cases)
+    col3.metric("Success Rate", f"{success_rate:.1f}%")
+    col4.metric("Avg MTTR (hrs)", f"{avg_mttr:.2f}")
 
 # ====================== OPEN CASES ======================
 elif page == "Open Cases":
     st.header("Open Cases (Work in Progress)")
-    # ... (your open cases code)
+    open_df = df[df["Status"].isin(["Open", "In Progress"])].copy()
+    if open_df.empty:
+        st.success("No open cases right now!")
+    else:
+        st.dataframe(open_df, use_container_width=True, hide_index=True)
 
 # ====================== LOG NEW INCIDENT ======================
 elif page == "Log New Incident":
     st.header("Create New Incident")
-    # ... (your log new incident code)
+    col1, col2 = st.columns(2)
+    truck_id = col1.text_input("Truck ID *", placeholder="T-007")
+    trailer_id = col2.text_input("Trailer ID *", placeholder="1234")
+    load_id = st.text_input("Load ID *", placeholder="LD-8923")
+    alert_time = st.text_input("Alert Time", value=datetime.now().strftime("%Y-%m-%d %H:%M"))
+    incident_type = st.selectbox("Incident Type *", ["Sensor fault", "Mechanical brake", "Charging issue", "Weather-related", "Tire issue", "Other"])
+    notes = st.text_area("Initial Notes")
+
+    if st.button("Create Incident (Open)", type="primary", use_container_width=True):
+        if not truck_id or not trailer_id or not load_id:
+            st.error("Truck ID, Trailer ID, and Load ID are required!")
+        else:
+            new_row = {
+                "Date": datetime.now().strftime("%Y-%m-%d"),
+                "Incident_ID": f"INC-{len(df)+1:03d}",
+                "Truck_ID": truck_id,
+                "Trailer_ID": trailer_id,
+                "Load_ID": load_id,
+                "Alert_Time": alert_time,
+                "First_Response_Time": "",
+                "Recovery_Complete_Time": "",
+                "Incident_Type": incident_type,
+                "Resolution_Method": "",
+                "Customer_Notified_Time": "",
+                "Status": "Open",
+                "Success_YN": "",
+                "Recovery_Cost_USD": 0.0,
+                "Downtime_Hours": 0.0,
+                "Notes": notes
+            }
+            df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+            df.to_csv("incidents.csv", index=False)
+            st.success(f"Incident {new_row['Incident_ID']} created successfully!")
+            st.balloons()
+            time.sleep(1.5)
+            st.rerun()
 
 # ====================== UPDATE INCIDENT ======================
 elif page == "Update Incident":
