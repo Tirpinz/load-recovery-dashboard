@@ -9,7 +9,7 @@ st.set_page_config(page_title="Load Recovery Dashboard", layout="wide")
 st.markdown("""
     <style>
     [data-testid="stSidebar"] { background-color: #1e3a8a !important; }
-    [data-testid="stSidebar"] * { color: white !important; }
+    [data-testid="stSidebar"] * { color: black !important; }
     .main { background-color: #f8fafc; }
     </style>
 """, unsafe_allow_html=True)
