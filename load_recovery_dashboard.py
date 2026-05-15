@@ -178,4 +178,4 @@ elif page == "All Incidents":
     else:
         st.info("No incidents logged yet.")
 
-st.sidebar.caption("Volvo Trucks | Load Recovery Specialist Tool")
+st.sidebar.caption("Volvo Trucks | Load Recovery Specialist Tool / Built By Millarski and Jeffery Star")
