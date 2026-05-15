@@ -49,7 +49,7 @@ page = st.sidebar.selectbox("Navigate", ["📊 Dashboard", "🔴 Open Cases", "�
 
 # ====================== UPDATE INCIDENT ======================
 elif page == "Update Incident":
-    st.header("✏️ Update Existing Incident (Close or Edit)")
+ st.header(" Update Existing Incident (Close or Edit)")
 
     if df.empty:
         st.info("No incidents to update yet.")
