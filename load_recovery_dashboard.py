@@ -68,13 +68,55 @@ if page == "Dashboard":
     col4.metric("Avg MTTR (hrs)", f"{avg_mttr:.2f}")
 
 # ====================== OPEN CASES ======================
-elif page == "Open Cases":
-    st.header("Open Cases (Work in Progress)")
+elif page == "🔴 Open Cases":
+    st.header("🔴 Open Cases (Work in Progress)")
+
     open_df = df[df["Status"].isin(["Open", "In Progress"])].copy()
+    
     if open_df.empty:
-        st.success("No open cases right now!")
+        st.success("🎉 No open cases right now!")
     else:
-        st.dataframe(open_df, use_container_width=True, hide_index=True)
+        # Calculate Time Open
+        open_df = open_df.copy()
+        try:
+            open_df["Time_Open_Hours"] = round(
+                (pd.to_datetime(datetime.now()) - pd.to_datetime(open_df["Alert_Time"])).dt.total_seconds() / 3600, 
+                1
+            )
+        except:
+            open_df["Time_Open_Hours"] = 0.0
+
+        # Filter Option
+        filter_option = st.radio("Filter", ["All Open Cases", "High Priority (>8 hrs)"], horizontal=True)
+
+        if filter_option == "High Priority (>8 hrs)":
+            open_df = open_df[open_df["Time_Open_Hours"] > 8]
+
+        # Color Coding Function
+        def color_rows(row):
+            hours = row["Time_Open_Hours"]
+            if hours > 8:
+                return ['background-color: #fee2e2'] * len(row)   # Red - Urgent
+            elif hours > 4:
+                return ['background-color: #fef3c7'] * len(row)   # Yellow - Warning
+            else:
+                return ['background-color: #d1fae5'] * len(row)   # Green - Normal
+
+        st.subheader(f"Active Open Cases: **{len(open_df)}**")
+
+        # Apply colors
+        styled_df = open_df.style.apply(color_rows, axis=1)
+
+        st.dataframe(
+            styled_df,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Time_Open_Hours": st.column_config.NumberColumn("Time Open (hrs)", format="%.1f")
+            }
+        )
+
+        st.caption("🟢 **0–4 hours** = Normal | 🟡 **4–8 hours** = Warning | 🔴 **>8 hours** = High Priority")
 
 # ====================== LOG NEW INCIDENT ======================
 elif page == "Log New Incident":
