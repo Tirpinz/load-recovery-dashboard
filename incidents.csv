@@ -1,0 +1,12 @@
+Date,Incident_ID,Truck_ID,Trailer_ID,Load_ID,Alert_Time,First_Response_Time,Recovery_Complete_Time,Incident_Type,Resolution_Method,Customer_Notified_Time,Success_YN,Recovery_Cost_USD,Downtime_Hours,Notes,Incident_Count,Status
+2026-04-21,INC-001,245,345,7567,2026-04-21 13:46,,,Sensor fault,,,,0.0,0.0,,1.0,Closed
+2026-04-21,INC-002,a01006,475848,9876,2026-04-21 13:52,,,Tire issue,,,,450.0,0.0,,,Open
+2026-04-21,INC-003,a01006,475848,9876,2026-04-21 13:52,,,Tire issue,Tow + tractor swap,,Y,450.0,3.8,,,
+2026-04-21,INC-004,34543,2454,4909,2026-04-21 14:00,,,Sensor fault,Remote reset,,Y,0.0,3.8,test test,,
+2026-04-21,INC-005,85943,3945,9924,2026-04-21 14:08,4/21/2026,,Sensor fault,,,,0.0,0.0,this is a test / this is resolved now,,Closed
+2026-04-21,INC-006,7895,234456,9898,2026-04-21 14:16,,,Other,,,,0.0,0.0,this is a test ticket,,In Progress
+2026-04-23,INC-007,848,94830,5274,2026-04-23 08:10,,,Other,,,,0.0,0.0,"truck broke down, ",,Open
+2026-04-23,INC-008,848,94830,5274,2026-04-23 08:10,4/23/2026 8:11am,,Other,,4/23/2026 8:30am,,0.0,0.0,"truck broke down,  uptime working recovering",,In Progress
+2026-05-05,INC-009,556,345,6678,2026-05-05 14:33,,,Tire issue,,,,0.0,0.0,test tire blow out,,Open
+2026-05-06,INC-010,asvat01010,45632,4900,2026-05-06 09:53,,,Other,,,,0.0,0.0,"ad driver broke down , troubleshooting with aurora",,Open
+2026-05-07,INC-011,jeffs truck,2345998,3456,2026-05-07 08:43,,,Other,,,,0.0,0.0,ran out of fuel,,Open

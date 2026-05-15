@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Load Recovery Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <h2>🚛 Load Recovery</h2>
+      <ul>
+        <li onclick="showSection('dashboard')">📊 Dashboard</li>
+        <li onclick="showSection('log')">➕ Log New Incident</li>
+        <li onclick="showSection('incidents')">📋 All Incidents</li>
+      </ul>
+      <div class="sidebar-footer">
+        <button onclick="toggleTheme()">🌙 Toggle Theme</button>
+        <p>Fleet Size: <span id="fleet-size">22</span></p>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+      <!-- Dashboard Section -->
+      <section id="dashboard-section" class="section">
+        <h1>Load Recovery KPI Dashboard</h1>
+        <div class="kpi-grid">
+          <div class="kpi-card" id="total-incidents">Total Incidents<br><span>0</span></div>
+          <div class="kpi-card" id="mttr">MTTR (hrs)<br><span>0</span></div>
+          <div class="kpi-card" id="success-rate">Success Rate<br><span>0%</span></div>
+          <div class="kpi-card" id="avg-cost">Avg Cost ($)<br><span>0</span></div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-container">
+            <h3>Incident Types</h3>
+            <canvas id="incidentTypeChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>Downtime Trend</h3>
+            <canvas id="downtimeTrendChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>Resolution Methods</h3>
+            <canvas id="resolutionChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Log New Incident Section -->
+      <section id="log-section" class="section" style="display:none;">
+        <h1>Log New Incident</h1>
+        <form id="incident-form">
+          <input type="text" id="truck-id" placeholder="Truck ID (e.g. T-007)" required>
+          <input type="text" id="trailer-id" placeholder="Trailer ID (e.g. TR-452)" required>
+          <input type="text" id="load-id" placeholder="Load ID" required>
+          <input type="datetime-local" id="alert-time" required>
+          <select id="incident-type">
+            <option value="">Select Incident Type</option>
+            <option>Sensor fault</option>
+            <option>Mechanical brake</option>
+            <option>Charging issue</option>
+            <option>Weather-related</option>
+            <option>Tire issue</option>
+            <option>Other</option>
+          </select>
+          <select id="resolution-method">
+            <option value="">Select Resolution</option>
+            <option>Remote reset</option>
+            <option>Tow + tractor swap</option>
+            <option>Remote + partner swap</option>
+            <option>Reroute</option>
+            <option>Transload</option>
+          </select>
+          <input type="number" id="recovery-cost" placeholder="Recovery Cost ($)" step="0.01">
+          <select id="success-yn">
+            <option value="Y">Success (Y)</option>
+            <option value="N">Failed (N)</option>
+          </select>
+          <textarea id="notes" placeholder="Notes"></textarea>
+          <button type="submit">Submit Incident</button>
+        </form>
+      </section>
+
+      <!-- All Incidents Section -->
+      <section id="incidents-section" class="section" style="display:none;">
+        <h1>All Incidents</h1>
+        <table id="incidents-table">
+          <thead>
+            <tr>
+              <th>Date</th><th>Truck</th><th>Trailer</th><th>Load</th><th>Type</th><th>MTTR (hrs)</th><th>Success</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
