@@ -48,7 +48,7 @@ df = load_data()
 page = st.sidebar.selectbox("Navigate", ["📊 Dashboard", "🔴 Open Cases", "➕ Log New Incident", "✏️ Update Incident", "📋 All Incidents"])
 
 # ====================== UPDATE INCIDENT ======================
-elif page == "✏️ Update Incident":
+elif page == "Update Incident":
     st.header("✏️ Update Existing Incident (Close or Edit)")
 
     if df.empty:
