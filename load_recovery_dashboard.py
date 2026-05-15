@@ -9,7 +9,7 @@ st.set_page_config(page_title="Load Recovery Dashboard", layout="wide")
 st.markdown("""
     <style>
     [data-testid="stSidebar"] { background-color: #1e3a8a !important; }
-    [data-testid="stSidebar"] * { color: black !important; }
+    [data-testid="stSidebar"] * { color: white !important; }
     .main { background-color: #f8fafc; }
     </style>
 """, unsafe_allow_html=True)
@@ -44,6 +44,7 @@ def load_data():
 
 df = load_data()
 
+# Clean navigation (no emojis to avoid bugs)
 page = st.sidebar.selectbox("Navigate", [
     "Dashboard", 
     "Open Cases", 
@@ -67,8 +68,8 @@ if page == "Dashboard":
     col3.metric("Success Rate", f"{success_rate:.1f}%")
     col4.metric("Avg MTTR (hrs)", f"{avg_mttr:.2f}")
 
-# ====================== OPEN CASES ======================
-elif page == "🔴 Open Cases":
+# ====================== OPEN CASES (with color coding) ======================
+elif page == "Open Cases":
     st.header("🔴 Open Cases (Work in Progress)")
 
     open_df = df[df["Status"].isin(["Open", "In Progress"])].copy()
@@ -76,51 +77,35 @@ elif page == "🔴 Open Cases":
     if open_df.empty:
         st.success("🎉 No open cases right now!")
     else:
-        # Calculate Time Open
         open_df = open_df.copy()
         try:
             open_df["Time_Open_Hours"] = round(
-                (pd.to_datetime(datetime.now()) - pd.to_datetime(open_df["Alert_Time"])).dt.total_seconds() / 3600, 
-                1
-            )
+                (pd.to_datetime(datetime.now()) - pd.to_datetime(open_df["Alert_Time"])).dt.total_seconds() / 3600, 1)
         except:
             open_df["Time_Open_Hours"] = 0.0
 
-        # Filter Option
         filter_option = st.radio("Filter", ["All Open Cases", "High Priority (>8 hrs)"], horizontal=True)
 
         if filter_option == "High Priority (>8 hrs)":
             open_df = open_df[open_df["Time_Open_Hours"] > 8]
 
-        # Color Coding Function
         def color_rows(row):
             hours = row["Time_Open_Hours"]
             if hours > 8:
-                return ['background-color: #fee2e2'] * len(row)   # Red - Urgent
+                return ['background-color: #fee2e2'] * len(row)   # Red
             elif hours > 4:
-                return ['background-color: #fef3c7'] * len(row)   # Yellow - Warning
+                return ['background-color: #fef3c7'] * len(row)   # Yellow
             else:
-                return ['background-color: #d1fae5'] * len(row)   # Green - Normal
+                return ['background-color: #d1fae5'] * len(row)   # Green
 
-        st.subheader(f"Active Open Cases: **{len(open_df)}**")
-
-        # Apply colors
         styled_df = open_df.style.apply(color_rows, axis=1)
+        st.dataframe(styled_df, use_container_width=True, hide_index=True)
 
-        st.dataframe(
-            styled_df,
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "Time_Open_Hours": st.column_config.NumberColumn("Time Open (hrs)", format="%.1f")
-            }
-        )
-
-        st.caption("🟢 **0–4 hours** = Normal | 🟡 **4–8 hours** = Warning | 🔴 **>8 hours** = High Priority")
+        st.caption("🟢 0–4 hrs | 🟡 4–8 hrs | 🔴 >8 hrs (High Priority)")
 
 # ====================== LOG NEW INCIDENT ======================
 elif page == "Log New Incident":
-    st.header("Create New Incident")
+    st.header("➕ Create New Incident")
     col1, col2 = st.columns(2)
     truck_id = col1.text_input("Truck ID *", placeholder="T-007")
     trailer_id = col2.text_input("Trailer ID *", placeholder="1234")
@@ -160,7 +145,7 @@ elif page == "Log New Incident":
 
 # ====================== UPDATE INCIDENT ======================
 elif page == "Update Incident":
-    st.header("Update Existing Incident")
+    st.header("✏️ Update Existing Incident")
 
     if df.empty:
         st.info("No incidents to update yet.")
