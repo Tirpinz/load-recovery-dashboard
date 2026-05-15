@@ -9,7 +9,7 @@ st.set_page_config(page_title="Load Recovery Dashboard", layout="wide")
 st.markdown("""
     <style>
     [data-testid="stSidebar"] { background-color: #1e3a8a !important; }
-    [data-testid="stSidebar"] * { color: black !important; }
+    [data-testid="stSidebar"] * { color: white !important; }
     .main { background-color: #f8fafc; }
     </style>
 """, unsafe_allow_html=True)
@@ -44,7 +44,6 @@ def load_data():
 
 df = load_data()
 
-# Clean navigation (no emojis to avoid bugs)
 page = st.sidebar.selectbox("Navigate", [
     "Dashboard", 
     "Open Cases", 
@@ -68,44 +67,18 @@ if page == "Dashboard":
     col3.metric("Success Rate", f"{success_rate:.1f}%")
     col4.metric("Avg MTTR (hrs)", f"{avg_mttr:.2f}")
 
-# ====================== OPEN CASES (with color coding) ======================
+# ====================== OPEN CASES ======================
 elif page == "Open Cases":
-    st.header("🔴 Open Cases (Work in Progress)")
-
+    st.header("Open Cases (Work in Progress)")
     open_df = df[df["Status"].isin(["Open", "In Progress"])].copy()
-    
     if open_df.empty:
-        st.success("🎉 No open cases right now!")
+        st.success("No open cases right now!")
     else:
-        open_df = open_df.copy()
-        try:
-            open_df["Time_Open_Hours"] = round(
-                (pd.to_datetime(datetime.now()) - pd.to_datetime(open_df["Alert_Time"])).dt.total_seconds() / 3600, 1)
-        except:
-            open_df["Time_Open_Hours"] = 0.0
-
-        filter_option = st.radio("Filter", ["All Open Cases", "High Priority (>8 hrs)"], horizontal=True)
-
-        if filter_option == "High Priority (>8 hrs)":
-            open_df = open_df[open_df["Time_Open_Hours"] > 8]
-
-        def color_rows(row):
-            hours = row["Time_Open_Hours"]
-            if hours > 8:
-                return ['background-color: #fee2e2'] * len(row)   # Red
-            elif hours > 4:
-                return ['background-color: #fef3c7'] * len(row)   # Yellow
-            else:
-                return ['background-color: #d1fae5'] * len(row)   # Green
-
-        styled_df = open_df.style.apply(color_rows, axis=1)
-        st.dataframe(styled_df, use_container_width=True, hide_index=True)
-
-        st.caption("🟢 0–4 hrs | 🟡 4–8 hrs | 🔴 >8 hrs (High Priority)")
+        st.dataframe(open_df, use_container_width=True, hide_index=True)
 
 # ====================== LOG NEW INCIDENT ======================
 elif page == "Log New Incident":
-    st.header("➕ Create New Incident")
+    st.header("Create New Incident")
     col1, col2 = st.columns(2)
     truck_id = col1.text_input("Truck ID *", placeholder="T-007")
     trailer_id = col2.text_input("Trailer ID *", placeholder="1234")
@@ -143,9 +116,9 @@ elif page == "Log New Incident":
             time.sleep(1.5)
             st.rerun()
 
-# ====================== UPDATE INCIDENT ======================
+# ====================== UPDATE INCIDENT with CHECKLIST ======================
 elif page == "Update Incident":
-    st.header("✏️ Update Existing Incident")
+    st.header("Update Existing Incident")
 
     if df.empty:
         st.info("No incidents to update yet.")
@@ -158,6 +131,16 @@ elif page == "Update Incident":
 
             st.subheader(f"Updating: {selected_id} - {incident['Truck_ID']} | {incident['Incident_Type']}")
 
+            # Recovery Checklist
+            st.subheader("Recovery Checklist")
+            checklist = st.multiselect(
+                "Mark completed steps",
+                ["Customer Notified", "First Response Made", "Vendor/Tow Dispatched", 
+                 "Replacement Tractor Arranged", "Transload Arranged", "New ETA Given", 
+                 "Load Secured/Recovered", "Documentation Completed", "TMS Updated"],
+                default=[]
+            )
+
             col1, col2 = st.columns(2)
             first_response = col1.text_input("First Response Time", value=str(incident.get("First_Response_Time", "")))
             recovery_complete = col2.text_input("Recovery Complete Time", value=str(incident.get("Recovery_Complete_Time", "")))
@@ -168,7 +151,7 @@ elif page == "Update Incident":
             success = st.selectbox("Final Success?", ["", "Y", "N"])
             status = st.selectbox("Status", ["Open", "In Progress", "Closed"])
 
-            notes = st.text_area("Updated Notes", value=str(incident.get("Notes", "")))
+            notes = st.text_area("Additional Notes", value=str(incident.get("Notes", "")))
 
             if st.button("Update & Save Incident", type="primary", use_container_width=True):
                 df.at[incident_idx, "First_Response_Time"] = first_response
@@ -178,7 +161,7 @@ elif page == "Update Incident":
                 df.at[incident_idx, "Recovery_Cost_USD"] = cost
                 df.at[incident_idx, "Success_YN"] = success
                 df.at[incident_idx, "Status"] = status
-                df.at[incident_idx, "Notes"] = notes
+                df.at[incident_idx, "Notes"] = notes + "\nChecklist: " + ", ".join(checklist)
 
                 df.to_csv("incidents.csv", index=False)
                 st.success(f"Incident {selected_id} updated successfully!")
